@@ -14,7 +14,7 @@ namespace Match_to_Pass___Console_Application
         const int NUM_COLOR_COMBINATION_NORMAL_DIFFICULTY = 8;  // Number of colors in the combination in normal difficulty
         const int NUM_COLOR_COMBINATION_HARD_DIFFICULTY = 12;   // Number of colors in the combination in hard difficulty
         const int NUM_COLOR_COMBINATION_EXPERT_DIFFICULTY = 16; // Number of colors in the combination in expert difficulty
-        const bool DEBUG = true;                                // Debug mode
+        const bool DEBUG = false;                               // Debug mode
 
         static void Main(string[] args)
         {
