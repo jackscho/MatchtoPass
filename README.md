@@ -1,2 +1,2 @@
 # MatchtoPass
-Code Breaking Color Game
+Bomb Defusal Game - Match the correct Color Combinations
