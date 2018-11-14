@@ -1,268 +1,329 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    private readonly Color[] COLORS = { Color.black, Color.blue, Color.cyan, Color.gray, Color.green, Color.magenta, Color.red, Color.yellow };
-    public GameObject resultPanel;
-    public Button[] userColors;
+    public GameObject resultsPanel;
+    public GameObject bombPanel;
+
+    public Text levelNameText;
+    public Text timeDisplayText;
+    public Text resultsText;
+
+    public RawImage HeadRawImage;
+    public Image repeatImage;
+    public RawImage resultRawImage;
+
+    public Transform colorSlotButtonsParent;
+    public Transform colorHintImagesParent;
+    public Transform colorOptionsButtonsParent;
+
+    public SimpleObjectPool colorSlotObjectPool;
+    public SimpleObjectPool colorHintsObjectPool;
+    public SimpleObjectPool colorOptionsObjectPool;
+
     public Button backButton;
     public Button clearButton;
     public Button checkButton;
-    public Text timeDisplay;
-    public Text guessDisplay;
-    public Text resultDisplay;
-    public Text hintDisplay;
-    private float timeInSeconds;
-    private int numColorCombinations;   // Number of colors in the color combination.
-    private int numGuess;               // Number of guesses the user gets.
+    public Button returnToMainMenuButton;
+
+    private DataController dataController;
+    private LevelData currentLevelData;
+
+    private List<GameObject> colorSlotGameObjects = new List<GameObject>();
+    private List<GameObject> colorHintsGameObjects = new List<GameObject>();
+    private List<GameObject> colorOptionsGameObjects = new List<GameObject>();
+
+    private List<Color> colorCombination = new List<Color>();
+
+    private Texture2D texture2D;
+
+    private float timeInSecondsFromLevel;
+    private int timeInMinutes;
+    private int timeInSeconds;
+    private int timeInMiliseconds;
     private int numColorsSelected;
-    private bool repeatColors;          // Determines whether colors in the color combination will repeat.
-    private int guess;                  // Determines if the color guess is one of the right colors but not in the right position, or if the color is is not in the color combination
-    private Color[] colorCombination;   // String array with the correct colors in the color combination
+    private int guess;
+    private int currentColorRow;
+    private int numGuess;
+    private int currentLevel;
 
     // Use this for initialization
     void Start ()
     {
-        resultPanel.SetActive(false);
+        currentLevel = -1;
+        dataController = FindObjectOfType<DataController>();
+        resultsPanel.SetActive(false);
+        ShowNewLevel();
+    }
+
+    private void ShowNewCombination()
+    {
+        currentColorRow++;
+        numGuess = currentLevelData.colorSlotRows[currentColorRow].numberOfGuesses;
+
         backButton.interactable = false;
         clearButton.interactable = false;
         checkButton.interactable = false;
-        timeInSeconds = 120f;
-        numColorCombinations = 4;
-        numGuess = (int)(Mathf.Log(Mathf.Pow(COLORS.Length, numColorCombinations)) / Mathf.Log(2));
-        repeatColors = false;
-        colorCombination = new Color[numColorCombinations];
-        randomizeColorCombination();
-        timeDisplay.text = "Time: " + timeInSeconds.ToString();
-        guessDisplay.text = "Guesses: " + numGuess.ToString();
+
+        RemoveColorSlotsandColorHints();
+
+        ShowColorSlotsAndHints();
+
+        DetermineIfColorsCanRepeat();
+
+        RandomizeColorCombination();
+
         numColorsSelected = 0;
-
-        DEBUG();
     }
 
-    private void DEBUG()
+    private void ShowNewLevel()
     {
-        for (int i = 0; i < numColorCombinations; i++)
-            Debug.Log(colorCombination[i].ToString());
+        currentColorRow = -1;
+        currentLevel++;
+        currentLevelData = dataController.GetCurrentLevelData(currentLevel);
+        levelNameText.text = currentLevelData.levelName;
+        timeInSecondsFromLevel = currentLevelData.timeLimitInSeconds;
+
+        texture2D = Resources.Load(currentLevelData.headSpriteLocation) as Texture2D;
+        HeadRawImage.texture = texture2D;
+
+        bombPanel.GetComponent<Image>().color = currentLevelData.bombColor;
+
+        RemoveColorOptions();
+
+        ShowNewCombination();
+
+        ShowColorOptions();
     }
 
-    // The randomizeColorCombination method randomizes the correct color combination. Colors can or can not repeat
-    private void randomizeColorCombination()
+    private void DetermineIfColorsCanRepeat()
     {
-        // Colors in the color combination can repeat
-        if (repeatColors)
-        {
-            // Randomly select colors from all the total possibe colors and put them in the color combination
-            for (int i = 0; i < numColorCombinations; i++)
-                colorCombination[i] = COLORS[Random.Range(0, COLORS.Length)];
-        }
-
-        // Otherwise, colors in the color combination will not repeat
+        if (currentLevelData.colorSlotRows[currentColorRow].canColorsRepeatInRow)
+            repeatImage.color = Color.green;
         else
+            repeatImage.color = Color.red;
+    }
+
+    private void ShowColorSlotsAndHints()
+    {
+        for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
         {
-            for (int i = 0; i < numColorCombinations;)
-            {
-                // Randomly select a color from all the total possibe colors and put it in the corresponding index in the color combination
-                colorCombination[i] = COLORS[Random.Range(0 , COLORS.Length)];
+            GameObject colorSlotGameObject = colorSlotObjectPool.GetObject();
+            colorSlotGameObject.GetComponent<Button>().image.color = Color.white;
+            colorSlotGameObjects.Add(colorSlotGameObject);
+            colorSlotGameObject.transform.SetParent(colorSlotButtonsParent.transform, false);
 
-                // The first index in the color combination can be skipped after putting in a color because this can be any random color
-                if (i == 0)
-                    i++;
-
-                // If its not the first index, check to see if the next index has a repeated color. If so, another random color will be selected for this index
-                else
-                {
-                    // Check if the last filled index has the same color as some other index
-                    for (int j = i - 1; j >= 0; j--)
-                    {
-                        // If the last filled index has the same color as the previous index, don't check the next index and repeat the first for loop with the same index
-                        if (colorCombination[i] == colorCombination[j])
-                            break;
-
-                        // If the last filled index doesn't have the same color as some other index, repeat the first for loop with the next index in the color combination
-                        if (j == 0)
-                            i++;
-                    }
-                }
-            }
+            GameObject colorHintsGameObject = colorHintsObjectPool.GetObject();
+            colorHintsGameObject.GetComponent<Image>().color = Color.white;
+            colorHintsGameObjects.Add(colorHintsGameObject);
+            colorHintsGameObject.transform.SetParent(colorHintImagesParent.transform, false);
         }
     }
-    
-    public void Black()
+
+    private void ShowColorOptions()
     {
-        if(numColorsSelected != numColorCombinations)
+        for (int i = 0; i < currentLevelData.userColorOptions.Length; i++)
         {
-            userColors[numColorsSelected].image.color = Color.black;
+            GameObject colorOptionsGameObject = colorOptionsObjectPool.GetObject();
+            colorOptionsGameObject.GetComponent<Button>().image.color = currentLevelData.userColorOptions[i];
+            colorOptionsGameObjects.Add(colorOptionsGameObject);
+            colorOptionsGameObject.transform.SetParent(colorOptionsButtonsParent.transform, false);
+
+            UserColors userColor = colorOptionsGameObject.GetComponent<UserColors>();
+            userColor.Setup(currentLevelData.userColorOptions[i]);
+        }
+    }
+
+    private void RemoveColorSlotsandColorHints()
+    {
+        while (colorSlotGameObjects.Count > 0)
+        {
+            colorSlotObjectPool.ReturnObject(colorSlotGameObjects[0]);
+            colorSlotGameObjects.RemoveAt(0);
+        }
+
+        while (colorHintsGameObjects.Count > 0)
+        {
+            colorHintsObjectPool.ReturnObject(colorHintsGameObjects[0]);
+            colorHintsGameObjects.RemoveAt(0);
+        }
+    }
+
+    private void RemoveColorOptions()
+    {
+        while (colorOptionsGameObjects.Count > 0)
+        {
+            colorOptionsObjectPool.ReturnObject(colorOptionsGameObjects[0]);
+            colorOptionsGameObjects.RemoveAt(0);
+        }
+    }
+
+    public void UserColorChoiceClicked(Color color)
+    {
+        if (numColorsSelected != currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns)
+        {
+            colorSlotGameObjects[numColorsSelected].GetComponent<Button>().image.color = color;
             numColorsSelected++;
         }
     }
 
-    public void Blue()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.blue;
-            numColorsSelected++;
-        }
-    }
-
-    public void Cyan()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.cyan;
-            numColorsSelected++;
-        }
-    }
-
-    public void Gray()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.gray;
-            numColorsSelected++;
-        }
-    }
-
-    public void Green()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.green;
-            numColorsSelected++;
-        }
-    }
-
-    public void Magenta()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.magenta;
-            numColorsSelected++;
-        }
-    }
-
-    public void Red()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.red;
-            numColorsSelected++;
-        }
-    }
-
-    public void Yellow()
-    {
-        if (numColorsSelected != numColorCombinations)
-        {
-            userColors[numColorsSelected].image.color = Color.yellow;
-            numColorsSelected++;
-        }
-    }
-
-    public void Back()
+    public void Undo()
     {
         numColorsSelected--;
-        userColors[numColorsSelected].image.color = Color.white;
+        colorSlotGameObjects[numColorsSelected].GetComponent<Button>().image.color = Color.white;
     }
+
 
     public void Clear()
     {
-        for (int i = 0; i < numColorCombinations; i++)
-            userColors[i].image.color = Color.white;
+        for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
+            colorSlotGameObjects[i].GetComponent<Button>().image.color = Color.white;
 
         numColorsSelected = 0;
+    }
+
+    private void RandomizeColorCombination()
+    {
+        colorCombination.Clear();
+
+        if (!currentLevelData.colorSlotRows[currentColorRow].canColorsRepeatInRow && currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns <= currentLevelData.userColorOptions.Length)
+        {
+            for (int i = 0; i < currentLevelData.userColorOptions.Length; i++)
+                colorCombination.Add(Color.clear);
+
+            for (int i = 0, j; i < colorCombination.Count; i++)
+            {
+                j = Random.Range(0, i + 1);
+
+                if (j != i)
+                    colorCombination[i] = colorCombination[j];
+
+                colorCombination[j] = currentLevelData.userColorOptions[i];
+            }
+
+            colorCombination.RemoveRange(currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns - 1, colorCombination.Count - currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns);
+        }
+
+        else
+        {
+            for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
+                colorCombination.Add(currentLevelData.userColorOptions[Random.Range(0, currentLevelData.userColorOptions.Length)]);
+        }
+
+        for (int i = 0; i < colorCombination.Count; i++)
+            Debug.Log(colorCombination[i].ToString());
     }
 
     public void CheckColorCombination()
     {
-        hintDisplay.text = "";
         int correctGuesses;     // Keeps track of the number of correct guesses in the user's color combination
-        int guess;                  // Determines if the color guess is one of the right colors but not in the right position, or if the color is is not in the color combination
+        int guess;              // Determines if the color guess is one of the right colors but not in the right position, or if the color is is not in the color combination
 
         correctGuesses = 0; // Reset the number of correct guesses to zero
 
         // Check to see if the user's color combination guess is correct
-        for (int j = 0; j < numColorCombinations; j++)
+        for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
         {
             // If one color of the user's color combination guess doesn't match up with the correct color combination, don't check the rest
-            if (userColors[j].image.color != colorCombination[j])
+            if (colorSlotGameObjects[i].GetComponent<Button>().image.color != colorCombination[i])
                 break;
             correctGuesses++;
         }
 
         // If the user's color combination guess is correct, stop the game and output winner message
-        if (correctGuesses == numColorCombinations)
+        if (correctGuesses == currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns)
         {
-            resultDisplay.text = "You got the right combination!!\nWinner Winner Chicken Dinner!!";
-            resultPanel.SetActive(true);
+            texture2D = Resources.Load("Green Check") as Texture2D;
+            resultRawImage.texture = texture2D;
+
+            if (currentColorRow == currentLevelData.colorSlotRows.Length - 1)
+            {
+                if (currentLevel == dataController.GetNumberOfLevels() - 1)
+                {
+                    resultsText.text = "You got the right combination!!\nWinner Winner Chicken Dinner!!";
+                    resultsPanel.SetActive(true);
+                }
+
+                else
+                    ShowNewLevel();
+            }
+            
+            else
+                ShowNewCombination();
+
             return;
         }
 
+        texture2D = Resources.Load("Red X") as Texture2D;
+        resultRawImage.texture = texture2D;
+
         // If the user's color combination guess is not correct, output one of three possible outcomes for each color in the user's color combination guess
-        for (int j = 0; j < numColorCombinations; j++)
+        for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
         {
             // If one of the colors in the user's color combination matches the same position as the correct color combination, let the user know and immediately check the next color
-            if (userColors[j].image.color == colorCombination[j])
+            if (colorSlotGameObjects[i].GetComponent<Button>().image.color == colorCombination[i])
             {
-                hintDisplay.text += "Color " + (j + 1) + " is in the right position\n";
+                colorHintsGameObjects[i].GetComponent<Image>().color = Color.green;
                 continue;
             }
 
             guess = 0;  // Reset guess to zero
 
             // Compare one of the user's color combinaion guesses with each position in the correct color combination until a match is found
-            for (int k = 0; k < numColorCombinations; k++)
+            for (int j = 0; j < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; j++)
             {
                 // If one of the colors in the user's color combination matches some color in the correct color combination but not in the right position, let the user know
-                if (userColors[j].image.color == colorCombination[k])
+                if (colorSlotGameObjects[i].GetComponent<Button>().image.color == colorCombination[j])
                 {
-                    hintDisplay.text += "Color " + (j + 1) + " is one of the right colors, but its not in the right position\n";
+                    colorHintsGameObjects[i].GetComponent<Image>().color = Color.yellow;
                     break;
                 }
                 guess++;
             }
 
             // If one of the colors in the user's color combination isn't any of the colors in the correct color combination, let the user know
-            if (guess == numColorCombinations)
-                hintDisplay.text += "Color " + (j + 1) + " is not one of the right colors\n";
+            if (guess == currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns)
+                colorHintsGameObjects[i].GetComponent<Image>().color = Color.red;
         }
 
         numGuess--;
-        guessDisplay.text = "Guesses: " + numGuess.ToString();
 
         // If the user's number of guesses are all used up, stop the game and output loser message
         if (numGuess == 0)
         {
-            resultDisplay.text = "You lose...\nTry again next time!";
-            resultPanel.SetActive(true);
+            resultsText.text = "You lose...\nTry again next time!";
+            resultsPanel.SetActive(true);
         }
     }
 
     public void returnToMainMenu()
     {
-        SceneManager.LoadScene("MenuScreen");
+        SceneManager.LoadScene("MenuScreens");
     }
 
     // Update is called once per frame
     void Update ()
     {
         if (Input.GetKey("escape"))
-            SceneManager.LoadScene("MenuScreen");
+            SceneManager.LoadScene("MenuScreens");
 
-        if (timeInSeconds > 0.0f)
+        if (timeInSecondsFromLevel > 0.0f)
         {
-            timeInSeconds -= Time.deltaTime;
-            timeDisplay.text = "Time: " + (Mathf.Round(timeInSeconds * 10) / 10).ToString();
+            timeInSecondsFromLevel -= Time.deltaTime;
+            timeInMinutes = (int) timeInSecondsFromLevel / 60;
+            timeInSeconds = (int) timeInSecondsFromLevel % 60;
+            timeInMiliseconds = (int) (timeInSecondsFromLevel * 100) % 100;
+            
+            timeDisplayText.text = timeInMinutes.ToString("00") + ":" + timeInSeconds.ToString("00") + ":" + timeInMiliseconds.ToString("00");
         }
         else
         {
-            resultDisplay.text = "You lose...\nTry again next time!";
-            resultPanel.SetActive(true);
+            resultsText.text = "You lose...\nTry again next time!";
+            resultsPanel.SetActive(true);
         }
 
         if (numColorsSelected > 0)
@@ -276,10 +337,10 @@ public class GameController : MonoBehaviour
             clearButton.interactable = false;
         }
 
-        if (numColorsSelected == numColorCombinations)
+        if (numColorsSelected == currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns)
             checkButton.interactable = true;
         else
             checkButton.interactable = false;
-        
-	}
+
+    }
 }

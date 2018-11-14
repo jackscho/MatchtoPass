@@ -113,3 +113,144 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &683277657
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 683277658}
+  - component: {fileID: 683277659}
+  m_Layer: 0
+  m_Name: DataController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &683277658
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 683277657}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &683277659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 683277657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1ce80ba5384bf4ca184e59b1be7d7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allLevelData:
+  - levelName: 'Level 1: Diego'
+    headSpriteLocation: Diego Face
+    timeLimitInSeconds: 30
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 3
+      canColorsRepeatInRow: 0
+    userColorOptions:
+    - {r: 1, g: 0, b: 0, a: 1}
+    - {r: 1, g: 0.5694697, b: 0, a: 1}
+    - {r: 0.993248, g: 1, b: 0, a: 1}
+    - {r: 0.002629757, g: 0, b: 1, a: 1}
+    bombColor: {r: 0, g: 1, b: 0, a: 1}
+  - levelName: 'Level 2: Jack'
+    headSpriteLocation: Jack Face
+    timeLimitInSeconds: 30
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 3
+      canColorsRepeatInRow: 1
+    userColorOptions:
+    - {r: 1, g: 0, b: 0.030630589, a: 1}
+    - {r: 0, g: 0, b: 1, a: 1}
+    - {r: 0, g: 1, b: 0, a: 1}
+    - {r: 1, g: 0, b: 0.8600216, a: 1}
+    bombColor: {r: 1, g: 0.9456897, b: 0, a: 1}
+  - levelName: 'Level 3: Jawuan'
+    headSpriteLocation: Jawaun Face
+    timeLimitInSeconds: 60
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 4
+      canColorsRepeatInRow: 0
+    userColorOptions:
+    - {r: 0, g: 1, b: 0, a: 1}
+    - {r: 1, g: 0, b: 1, a: 1}
+    - {r: 1, g: 0, b: 0, a: 1}
+    - {r: 0, g: 1, b: 1, a: 1}
+    - {r: 1, g: 1, b: 0.05882353, a: 1}
+    bombColor: {r: 0, g: 0.7994144, b: 1, a: 1}
+  - levelName: 'Level 4: Mike'
+    headSpriteLocation: Mike Face
+    timeLimitInSeconds: 60
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 4
+      canColorsRepeatInRow: 1
+    userColorOptions:
+    - {r: 1, g: 0, b: 0.7576804, a: 1}
+    - {r: 0, g: 1, b: 0, a: 1}
+    - {r: 0, g: 0, b: 1, a: 1}
+    - {r: 0.86248064, g: 1, b: 0, a: 1}
+    - {r: 0.59608555, g: 0, b: 1, a: 1}
+    bombColor: {r: 0, g: 0.7994144, b: 1, a: 1}
+  - levelName: Level 5:Myles
+    headSpriteLocation: Myles Face
+    timeLimitInSeconds: 120
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 5
+      canColorsRepeatInRow: 0
+    userColorOptions:
+    - {r: 0.07186722, g: 0.8962264, b: 0.69256115, a: 1}
+    - {r: 0, g: 1, b: 0, a: 1}
+    - {r: 0, g: 0, b: 1, a: 1}
+    - {r: 0.86248064, g: 1, b: 0, a: 1}
+    - {r: 0.59608555, g: 0, b: 1, a: 1}
+    - {r: 1, g: 0.2760729, b: 0, a: 1}
+    bombColor: {r: 1, g: 0, b: 1, a: 1}
+  - levelName: 'Level 6: Tom'
+    headSpriteLocation: Tom Face
+    timeLimitInSeconds: 120
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 5
+      canColorsRepeatInRow: 1
+    userColorOptions:
+    - {r: 0.19127464, g: 0, b: 1, a: 1}
+    - {r: 1, g: 0.031996608, b: 0, a: 1}
+    - {r: 0, g: 1, b: 0.15156436, a: 1}
+    - {r: 1, g: 0, b: 0.8821888, a: 1}
+    - {r: 0, g: 1, b: 0.9478698, a: 1}
+    - {r: 1, g: 0.60295284, b: 0, a: 1}
+    bombColor: {r: 1, g: 0, b: 0, a: 1}
+  - levelName: 'Level 7: Edison'
+    headSpriteLocation: Edison Face
+    timeLimitInSeconds: 180
+    colorSlotRows:
+    - numberOfGuesses: 1000
+      numberOfColorSlotColumns: 6
+      canColorsRepeatInRow: 0
+    userColorOptions:
+    - {r: 0.006182432, g: 1, b: 0, a: 1}
+    - {r: 0.81594133, g: 0, b: 1, a: 1}
+    - {r: 1, g: 0, b: 0.03895569, a: 1}
+    - {r: 0, g: 0.8264365, b: 1, a: 1}
+    - {r: 1, g: 0.93470955, b: 0, a: 1}
+    - {r: 1, g: 0.60295284, b: 0, a: 1}
+    - {r: 0.018393517, g: 0, b: 1, a: 1}
+    bombColor: {r: 1, g: 0.60608166, b: 0, a: 1}
