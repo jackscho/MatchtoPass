@@ -11,6 +11,7 @@ public class GameController : MonoBehaviour
 
     public Text levelNameText;
     public Text timeDisplayText;
+    public Text guessDisplayText;
     public Text resultsText;
 
     public RawImage HeadRawImage;
@@ -46,9 +47,8 @@ public class GameController : MonoBehaviour
     private int timeInSeconds;
     private int timeInMiliseconds;
     private int numColorsSelected;
-    private int guess;
+    private int numGuesses;
     private int currentColorRow;
-    private int numGuess;
     private int currentLevel;
 
     // Use this for initialization
@@ -63,7 +63,8 @@ public class GameController : MonoBehaviour
     private void ShowNewCombination()
     {
         currentColorRow++;
-        numGuess = currentLevelData.colorSlotRows[currentColorRow].numberOfGuesses;
+        numGuesses = currentLevelData.colorSlotRows[currentColorRow].numberOfGuesses;
+        guessDisplayText.text = numGuesses.ToString();
 
         backButton.interactable = false;
         clearButton.interactable = false;
@@ -290,10 +291,11 @@ public class GameController : MonoBehaviour
                 colorHintsGameObjects[i].GetComponent<Image>().color = Color.red;
         }
 
-        numGuess--;
+        numGuesses--;
+        guessDisplayText.text = numGuesses.ToString();
 
         // If the user's number of guesses are all used up, stop the game and output loser message
-        if (numGuess == 0)
+        if (numGuesses == 0)
         {
             resultsText.text = "You lose...\nTry again next time!";
             resultsPanel.SetActive(true);

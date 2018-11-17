@@ -1,2 +1,2 @@
 # MatchtoPass
-Bomb Defusal - Color Matching Game in Unity
+Bomb Defusal - Color Matching Game
