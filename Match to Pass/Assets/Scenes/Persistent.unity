@@ -207,7 +207,7 @@ MonoBehaviour:
     - {r: 0, g: 0, b: 1, a: 1}
     - {r: 0.86248064, g: 1, b: 0, a: 1}
     - {r: 0.59608555, g: 0, b: 1, a: 1}
-    bombColor: {r: 0, g: 0.7994144, b: 1, a: 1}
+    bombColor: {r: 1, g: 1, b: 1, a: 1}
   - levelName: Level 5:Myles
     headSpriteLocation: Myles Face
     timeLimitInSeconds: 120
@@ -254,3 +254,20 @@ MonoBehaviour:
     - {r: 1, g: 0.60295284, b: 0, a: 1}
     - {r: 0.018393517, g: 0, b: 1, a: 1}
     bombColor: {r: 1, g: 0.60608166, b: 0, a: 1}
+  - levelName: 'Level 8: Professor Vallone'
+    headSpriteLocation: Vallone Face
+    timeLimitInSeconds: 210
+    colorSlotRows:
+    - numberOfGuesses: 21
+      numberOfColorSlotColumns: 6
+      canColorsRepeatInRow: 1
+    userColorOptions:
+    - {r: 0.006182432, g: 1, b: 0, a: 1}
+    - {r: 0, g: 0.6981132, b: 0.06331798, a: 1}
+    - {r: 0, g: 0.38679248, b: 0.0008602143, a: 1}
+    - {r: 0.57570004, g: 1, b: 0, a: 1}
+    - {r: 0.45138896, g: 0.6415094, b: 0.003025995, a: 1}
+    - {r: 0.8545019, g: 1, b: 0.504717, a: 1}
+    - {r: 0.8758415, g: 0.9056604, b: 0, a: 1}
+    - {r: 1, g: 0.60640585, b: 0, a: 1}
+    bombColor: {r: 0, g: 0, b: 0, a: 1}

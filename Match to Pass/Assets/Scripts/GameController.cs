@@ -7,16 +7,17 @@ using UnityEngine.UI;
 public class GameController : MonoBehaviour
 {
     public GameObject resultsPanel;
-    public GameObject bombPanel;
+    public GameObject pausePanel;
 
     public Text levelNameText;
     public Text timeDisplayText;
     public Text guessDisplayText;
-    public Text resultsText;
 
+    public Image BombStrapsImage;
     public RawImage HeadRawImage;
     public Image repeatImage;
     public RawImage resultRawImage;
+    public RawImage finalResultRawImage;
 
     public Transform colorSlotButtonsParent;
     public Transform colorHintImagesParent;
@@ -43,6 +44,7 @@ public class GameController : MonoBehaviour
     private Texture2D texture2D;
 
     private float timeInSecondsFromLevel;
+    private bool isTimeActive;
     private int timeInMinutes;
     private int timeInSeconds;
     private int timeInMiliseconds;
@@ -54,9 +56,11 @@ public class GameController : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-        currentLevel = -1;
         dataController = FindObjectOfType<DataController>();
+        currentLevel = dataController.GetLevel() - 1;
+        pausePanel.SetActive(false);
         resultsPanel.SetActive(false);
+        isTimeActive = true;
         ShowNewLevel();
     }
 
@@ -92,7 +96,7 @@ public class GameController : MonoBehaviour
         texture2D = Resources.Load(currentLevelData.headSpriteLocation) as Texture2D;
         HeadRawImage.texture = texture2D;
 
-        bombPanel.GetComponent<Image>().color = currentLevelData.bombColor;
+        BombStrapsImage.color = currentLevelData.bombColor;
 
         RemoveColorOptions();
 
@@ -174,17 +178,45 @@ public class GameController : MonoBehaviour
 
     public void Undo()
     {
+        checkButton.interactable = false;
+
         numColorsSelected--;
         colorSlotGameObjects[numColorsSelected].GetComponent<Button>().image.color = Color.white;
+        colorHintsGameObjects[numColorsSelected].GetComponent<Image>().color = Color.white;
+
+        if (numColorsSelected <= 0)
+        {
+            backButton.interactable = false;
+            clearButton.interactable = false;
+        }
     }
 
 
     public void Clear()
     {
+        backButton.interactable = false;
+        clearButton.interactable = false;
+        checkButton.interactable = false;
+
         for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
+        {
             colorSlotGameObjects[i].GetComponent<Button>().image.color = Color.white;
+            colorHintsGameObjects[i].GetComponent<Image>().color = Color.white;
+        }
 
         numColorsSelected = 0;
+    }
+
+    public void ChangeButtonState()
+    {
+        if (numColorsSelected > 0)
+        {
+            backButton.interactable = true;
+            clearButton.interactable = true;
+        }
+
+        if (numColorsSelected == currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns)
+            checkButton.interactable = true;
     }
 
     private void RandomizeColorCombination()
@@ -226,6 +258,8 @@ public class GameController : MonoBehaviour
 
         correctGuesses = 0; // Reset the number of correct guesses to zero
 
+        checkButton.interactable = false;
+
         // Check to see if the user's color combination guess is correct
         for (int i = 0; i < currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns; i++)
         {
@@ -243,9 +277,11 @@ public class GameController : MonoBehaviour
 
             if (currentColorRow == currentLevelData.colorSlotRows.Length - 1)
             {
-                if (currentLevel == dataController.GetNumberOfLevels() - 1)
+                if (dataController.GetPlayOneLevelChoice() || currentLevel == dataController.GetNumberOfLevels() - 1)
                 {
-                    resultsText.text = "You got the right combination!!\nWinner Winner Chicken Dinner!!";
+                    isTimeActive = false;
+                    texture2D = Resources.Load("Winning Image") as Texture2D;
+                    finalResultRawImage.texture = texture2D;
                     resultsPanel.SetActive(true);
                 }
 
@@ -297,7 +333,9 @@ public class GameController : MonoBehaviour
         // If the user's number of guesses are all used up, stop the game and output loser message
         if (numGuesses == 0)
         {
-            resultsText.text = "You lose...\nTry again next time!";
+            isTimeActive = false;
+            texture2D = Resources.Load("Losing Image") as Texture2D;
+            finalResultRawImage.texture = texture2D;
             resultsPanel.SetActive(true);
         }
     }
@@ -310,10 +348,16 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
-        if (Input.GetKey("escape"))
+        if (Input.GetKeyDown("escape"))
             SceneManager.LoadScene("MenuScreens");
 
-        if (timeInSecondsFromLevel > 0.0f)
+        if (Input.GetKeyDown(KeyCode.P) && !resultsPanel.activeSelf && timeInSecondsFromLevel > 0.0f)
+        {
+            isTimeActive = !isTimeActive;
+            pausePanel.SetActive(!pausePanel.activeSelf);
+        }
+
+        if (isTimeActive)
         {
             timeInSecondsFromLevel -= Time.deltaTime;
             timeInMinutes = (int) timeInSecondsFromLevel / 60;
@@ -321,28 +365,14 @@ public class GameController : MonoBehaviour
             timeInMiliseconds = (int) (timeInSecondsFromLevel * 100) % 100;
             
             timeDisplayText.text = timeInMinutes.ToString("00") + ":" + timeInSeconds.ToString("00") + ":" + timeInMiliseconds.ToString("00");
-        }
-        else
-        {
-            resultsText.text = "You lose...\nTry again next time!";
-            resultsPanel.SetActive(true);
-        }
 
-        if (numColorsSelected > 0)
-        {
-            backButton.interactable = true;
-            clearButton.interactable = true;
+            if (timeInSecondsFromLevel < 0.0f)
+            {
+                isTimeActive = false;
+                texture2D = Resources.Load("Losing Image") as Texture2D;
+                finalResultRawImage.texture = texture2D;
+                resultsPanel.SetActive(true);
+            }
         }
-        else
-        {
-            backButton.interactable = false;
-            clearButton.interactable = false;
-        }
-
-        if (numColorsSelected == currentLevelData.colorSlotRows[currentColorRow].numberOfColorSlotColumns)
-            checkButton.interactable = true;
-        else
-            checkButton.interactable = false;
-
     }
 }

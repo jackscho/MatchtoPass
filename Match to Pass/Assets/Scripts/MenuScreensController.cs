@@ -6,32 +6,67 @@ using UnityEngine.SceneManagement;
 
 public class MenuScreensController : MonoBehaviour
 {
-    public GameObject TitleScreenPanel;
     public GameObject MainMenuPanel;
+    public GameObject LevelSelectPanel;
     public GameObject RulesPanel;
 
     public Button[] MainMenuButtons;
-    public Button[] RulesButtons;
+    public Button[] LevelSelectButtons;
+    public Button RulesBackButton;
+
+    private DataController dataController;
 
     private int buttonIndex;
 
-    public void ReadRules()
+    void Start ()
     {
+        dataController = FindObjectOfType<DataController>();
+        SetupLevelSelectButtons();
         buttonIndex = 0;
-        RulesButtons[buttonIndex].Select();
-        RulesPanel.SetActive(true);
+        MainMenuButtons[buttonIndex].Select();
     }
 
-    public void ReturnToMainMenu()
+    public void ReadRules()
+    {
+        RulesBackButton.Select();
+        RulesPanel.SetActive(true);
+        MainMenuPanel.SetActive(false);
+    }
+
+    public void SelectLevel()
+    {
+        buttonIndex = 0;
+        LevelSelectButtons[buttonIndex].Select();
+        LevelSelectPanel.SetActive(true);
+        MainMenuPanel.SetActive(false);
+    }
+
+    public void ReturnToMainMenuFromRules()
     {
         buttonIndex = 0;
         MainMenuButtons[buttonIndex].Select();
+        MainMenuPanel.SetActive(true);
         RulesPanel.SetActive(false);
+    }
+
+    public void ReturnToMainMenuFromLevelSelect()
+    {
+        buttonIndex = 0;
+        MainMenuButtons[buttonIndex].Select();
+        MainMenuPanel.SetActive(true);
+        LevelSelectPanel.SetActive(false);
     }
 
     public void PlayGame()
     {
+        dataController.SetupLevel(0, false);
         SceneManager.LoadScene("Game");
+    }
+
+    private void SetupLevelSelectButtons()
+    {
+        for (int i = 0; i < LevelSelectButtons.Length; i++)
+            LevelSelectButtons[i].GetComponent<LevelSelectController>().Setup(i);
     }
 
     public void Exit()
@@ -42,55 +77,70 @@ public class MenuScreensController : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
-        if (TitleScreenPanel.activeSelf && Input.anyKey)
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            buttonIndex = 0;
-            MainMenuPanel.SetActive(true);
-            TitleScreenPanel.SetActive(false);
-            MainMenuButtons[buttonIndex].Select();
+            if (MainMenuPanel.activeSelf)
+            {
+                buttonIndex--;
+
+                if (buttonIndex == -1)
+                    buttonIndex = MainMenuButtons.Length - 1;
+
+                MainMenuButtons[buttonIndex].Select();
+            }
+
+            else if (LevelSelectPanel.activeSelf)
+                LevelSelectButtons[buttonIndex].Select();
         }
 
-        if (MainMenuPanel.activeSelf && Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            if (MainMenuPanel.activeSelf)
+            {
+                buttonIndex++;
+
+                if (buttonIndex == MainMenuButtons.Length)
+                    buttonIndex = 0;
+
+                MainMenuButtons[buttonIndex].Select();
+            }
+
+            else if (LevelSelectPanel.activeSelf)
+                LevelSelectButtons[buttonIndex].Select();
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && LevelSelectPanel.activeSelf)
         {
             buttonIndex--;
 
             if (buttonIndex == -1)
-                buttonIndex = MainMenuButtons.Length - 1;
+                buttonIndex = LevelSelectButtons.Length - 1;
 
-            MainMenuButtons[buttonIndex].Select();
+            LevelSelectButtons[buttonIndex].Select();
         }
 
-        if (MainMenuPanel.activeSelf && Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow) && LevelSelectPanel.activeSelf)
         {
             buttonIndex++;
 
-            if (buttonIndex == MainMenuButtons.Length)
+            if (buttonIndex == LevelSelectButtons.Length)
                 buttonIndex = 0;
 
-            MainMenuButtons[buttonIndex].Select();
+            LevelSelectButtons[buttonIndex].Select();
         }
 
-        if (RulesPanel.activeSelf && Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Input.GetKeyDown("escape"))
         {
-            buttonIndex--;
-
-            if (buttonIndex == -1)
-                buttonIndex = RulesButtons.Length - 1;
-
-            RulesButtons[buttonIndex].Select();
-        }
-
-        if (RulesPanel.activeSelf && Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            buttonIndex++;
-
-            if (buttonIndex == RulesButtons.Length)
+            if (MainMenuPanel.activeSelf)
+                Application.Quit();
+            else
+            {
                 buttonIndex = 0;
-
-            RulesButtons[buttonIndex].Select();
+                MainMenuButtons[buttonIndex].Select();
+                MainMenuPanel.SetActive(true);
+                RulesPanel.SetActive(false);
+                LevelSelectPanel.SetActive(false);
+            }
         }
-
-        if (!TitleScreenPanel.activeSelf && Input.GetKeyDown("escape"))
-            Application.Quit();
     }
 }

@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Persistent.unity
     guid: 1dbf01550a2f2db409379015dcbfa863
   - enabled: 1
+    path: Assets/Scenes/TitleScreen.unity
+    guid: 8c00356e3e6e884469e0c788f38a773d
+  - enabled: 1
     path: Assets/Scenes/MenuScreens.unity
     guid: 53ff5ace309239f48add0702c143c689
   - enabled: 1

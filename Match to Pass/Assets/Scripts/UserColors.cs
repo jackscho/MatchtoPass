@@ -22,5 +22,6 @@ public class UserColors : MonoBehaviour
     public void HandleClick()
     {
         gameController.UserColorChoiceClicked(color);
+        gameController.ChangeButtonState();
     }
 }
